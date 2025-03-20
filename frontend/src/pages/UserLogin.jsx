@@ -1,28 +1,49 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { UserDataContext } from "../context/UserContext.jsx";
+import axios from "axios";
 
 export default function UserLogin() {
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userData, setUserData] = useState("");
+  // const [userData, setUserData] = useState("");
 
-  const handleSubmit = (e) => {
+  const { user, setUser } = useContext(UserDataContext);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email.includes("@")) {
-      setUserData({
-        email: email,
-        password: password,
-      });
-    } else {
-      setUserData({
-        username: email,
-        password: password,
-      });
+
+    // if (email.includes("@")) {
+    //   setUserData({
+    //     email: email,
+    //     password: password,
+    //   });
+    // } else {
+    //   setUserData({
+    //     username: email,
+    //     password: password,
+    //   });
+    // }
+
+    const userData = email.includes("@")
+      ? { email: email, password: password }
+      : { username: email, password: password };
+
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/login`,
+      userData
+    );
+
+    if (response.status === 200) {
+      const data = response.data;
+      setUser(data.user);
+      navigate("/home");
     }
+
     setEmail("");
     setPassword("");
   };
